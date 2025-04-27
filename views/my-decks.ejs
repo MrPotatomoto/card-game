@@ -1,0 +1,32 @@
+<h2>My Decks</h2>
+
+<% if (decks.length === 0) { %>
+  <p>You have not built any decks yet. Try building one in the deck builder!</p>
+<% } else { %>
+  <table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Deck Name</th>
+        <th>Number of Cards</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% decks.forEach(deck => { %>
+        <tr>
+          <td><a href="/deck/<%= deck._id %>"><%= deck.name %></a></td>
+          <td>
+            <!-- Optionally, calculate the total number of cards in this deck -->
+            <%= deck.cards.reduce((total, entry) => total + entry.quantity, 0) %>
+          </td>
+          <td>
+            <!-- Links for editing or deleting can be implemented further -->
+            <a href="/deck/<%= deck._id %>/edit">Edit</a>
+            |
+            <a href="/deck/<%= deck._id %>/delete" onclick="return confirm('Are you sure you want to delete this deck?');">Delete</a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+<% } %>

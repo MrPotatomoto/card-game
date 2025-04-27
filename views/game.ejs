@@ -1,0 +1,95 @@
+<h2>Game Room: <%= game.name %></h2>
+
+<!-- Show list of active users in the game -->
+<div id="active-users" style="margin-bottom: 10px;">
+  <strong>Active Users:</strong>
+  <span id="user-list"></span>
+</div>
+
+<!-- Typing indicator -->
+<div id="typing-indicator" style="margin-bottom: 10px; color: gray;"></div>
+
+<!-- Chat container -->
+<div id="chat-container" style="margin-bottom: 20px;">
+  <div id="chat-messages" style="border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px;">
+    <!-- Existing chat messages (loaded from previousMessages event) will be appended here -->
+  </div>
+  <form id="chat-form">
+    <input type="text" name="message" id="msg" placeholder="Type your message..." required autocomplete="off" />
+    <button type="submit">Send</button>
+  </form>
+</div>
+
+<!-- Include Socket.IO client library -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const gameId = '<%= game._id %>';
+  const userName = '<%= user.username %>';
+  const socket = io();
+
+  // Join the game room on connection.
+  socket.emit('joinGame', gameId, userName);
+
+  // Load previous messages when received.
+  socket.on('previousMessages', (messages) => {
+    const chatMessages = document.getElementById('chat-messages');
+    messages.forEach(msg => {
+      const messageDiv = document.createElement('div');
+      messageDiv.innerHTML = `<strong>${msg.user}</strong>: ${msg.message} <span style="font-size: small; color: gray;">(${new Date(msg.time).toLocaleTimeString()})</span>`;
+      chatMessages.appendChild(messageDiv);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  // Display new chat messages.
+  socket.on('chatMessage', (data) => {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.innerHTML = `<strong>${data.user}</strong>: ${data.message} <span style="font-size: small; color: gray;">(${data.time})</span>`;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  // Update active users list.
+  socket.on('userList', (users) => {
+    const userListSpan = document.getElementById('user-list');
+    userListSpan.innerText = users.join(', ');
+  });
+
+  // Typing indicator
+  const typingIndicator = document.getElementById('typing-indicator');
+  
+  // Listen for typing events from other users.
+  socket.on('userTyping', (typingUser) => {
+    if (typingUser !== userName) {
+      typingIndicator.innerText = `${typingUser} is typing...`;
+    }
+  });
+
+  socket.on('stopTyping', (typingUser) => {
+    if (typingUser !== userName) {
+      typingIndicator.innerText = '';
+    }
+  });
+
+  // Emit typing events when the user types.
+  const msgInput = document.getElementById('msg');
+  let typingTimeout;
+  msgInput.addEventListener('input', () => {
+    socket.emit('userTyping', gameId, userName);
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      socket.emit('stopTyping', gameId, userName);
+    }, 1000);
+  });
+
+  // Handle chat form submission.
+  document.getElementById('chat-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const message = msgInput.value.trim();
+    if (message === '') return;
+    socket.emit('chatMessage', { gameId, userName, message });
+    msgInput.value = '';
+    socket.emit('stopTyping', gameId, userName);
+  });
+</script>

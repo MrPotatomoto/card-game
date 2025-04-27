@@ -1,0 +1,231 @@
+/* public/css/styles.css */
+
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #335;
+}
+
+body {
+  font-family: sans-serif;
+  background: #f9f9f9;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  width: 100dvw;
+  min-height: 100dvh;
+}
+
+.wrapper {
+  width: 960px;
+  margin: 0 auto;
+}
+
+/* Header styles */
+header {
+  background: #335;
+  color: #fff;
+  padding: 20px;
+}
+
+header .wrapper {
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header h1 {
+  font-size: 2rem;
+}
+
+header nav {
+  display:flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+footer {
+  background-color: #334;
+  padding: 5rem;
+}
+
+/* Flash messages */
+.flash-messages {
+  margin-bottom: 20px;
+}
+
+.flash {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  margin-inline: 20px;
+}
+
+.flash.flash-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.flash.flash-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* Main content styles */
+main {
+  background: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+/* Links style */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+header a {
+
+  color: #00ff7b;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+input, button, select {
+  border-radius: .25rem;
+  border: 1px solid;
+}
+
+input, select {
+  padding: .5rem;
+}
+
+button {
+  padding: .5rem 1rem;
+}
+
+/* Smooth fade-in effect for newly added game session items */
+#gameList li {
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+#gameList li.show {
+  opacity: 1;
+}
+
+/* Toast container */
+#toast-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+/* Toast messages */
+.toast {
+  background-color: #333;
+  color: #fff;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  opacity: 0.9;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+/* Success toast (green) */
+.toast-success {
+  background-color: #28a745;
+}
+
+/* Error toast (red) */
+.toast-error {
+  background-color: #dc3545;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 1rem;
+}
+.card-item {
+  position: relative;
+  text-align: center;
+  transition: transform 0.2s;
+  cursor: pointer;
+  aspect-ratio: 2.5/3.5;
+  margin-block: 0;
+}
+.card-item:hover {
+  transform: scale(1.05);
+}
+.card-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.no-image {
+  width: 100%;
+  height: 150px;
+  background: #f0f0f0;
+  line-height: 150px;
+  color: #888;
+}
+.add-card-btn {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  left: 1rem;
+  padding: 5px 10px;
+  width: auto;
+  font-size: 12px;
+  opacity: 0.9;
+  display: none;
+  cursor: pointer;
+  background-color: lightgreen;
+}
+
+.add-card-btn:hover {
+  opacity: 1;
+}
+
+.card-item:hover .add-card-btn {
+  display: block;
+}
+
+table {
+  margin-top: 1rem;
+  /* overflow: hidden; */
+  border-radius: .5rem;
+  border: 2px solid black;
+}
+
+th, td {
+  padding: 1rem 1.5rem;
+}
+
+th {
+  border-top: 0;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+th:first-child, td:first-child {
+  border-left: 0;
+}
+
+th:last-child, td:last-child {
+  border-right: 0;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Card Game</title>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <header>
+      <div class="wrapper">
+        <h1>Card Game</h1>
+        <% if (user) { %>
+          <nav>
+            <a href="/">Home</a>
+            <a href="/deck-builder">Deck Builder</a>
+            <a href="/my-decks">My Decks</a>
+          </nav>        
+          <p>Hello, <%= user.username %> | <a href="/logout">Logout</a></p>
+        <% } else { %>
+          <p><a href="/login">Login</a> | <a href="/signup">Sign Up</a></p>
+        <% } %>
+      </div>
+    </header>
+  
+    
+    <main>
+      <!-- Toast Notification Container -->
+      <div id="toast-container"></div>
+    
+      <!-- Flash Messages Section -->
+      <div class="flash-messages">
+        <div class="wrapper">
+          <% if (messages.error && messages.error.length > 0) { %>
+            <div class="flash flash-error">
+              <% messages.error.forEach(msg => { %>
+                <p><%= msg %></p>
+              <% }); %>
+            </div>
+          <% } %>
+          <% if (messages.success && messages.success.length > 0) { %>
+            <div class="flash flash-success">
+              <% messages.success.forEach(msg => { %>
+                <p><%= msg %></p>
+              <% }); %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="wrapper">
+        <%- body %>
+      </div>
+    </main>
+    <footer></footer>
+
+    <script src="/js/script.js"></script>
+  </body>
+</html>

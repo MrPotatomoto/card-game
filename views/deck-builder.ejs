@@ -1,0 +1,77 @@
+<h2>Deck Builder</h2>
+<!-- Deck Form -->
+<h3>Your Deck</h3>
+<form id="deckForm" method="POST" action="/deck-builder">
+  <label for="deckName">Deck Name:</label>
+  <input type="text" name="deckName" id="deckName" required>
+  <!-- Hidden field to hold JSON-encoded deck data -->
+  <input type="hidden" name="cardData" id="cardData" value="[]">
+  <div id="deckList" style="margin: 10px 0; border: 1px solid #ccc; padding: 10px;">
+    <!-- The current deck contents will be displayed here -->
+  </div>
+  <button type="submit">Save Deck</button>
+</form>
+
+<!-- Deck Validation Feedback -->
+<div id="deckValidation" style="margin: 10px 0;"></div>
+<!-- Filtering Form -->
+<form id="filterForm" method="GET" action="/deck-builder" style="margin-bottom: 20px;">
+  <label for="type">Filter by Type:</label>
+  <select name="type" id="type">
+    <option value="" <%= filter.type === "" ? "selected" : "" %>>All</option>
+    <option value="Ally" <%= filter.type === "Ally" ? "selected" : "" %>>Ally</option>
+    <option value="Dragon Ball" <%= filter.type === "Dragon Ball" ? "selected" : "" %>>Dragon Ball</option>
+    <option value="Drill" <%= filter.type === "Drill" ? "selected" : "" %>>Drill</option>
+    <option value="Energy Combat" <%= filter.type === "Energy Combat" ? "selected" : "" %>>Energy Combat</option>
+    <option value="Event" <%= filter.type === "Event" ? "selected" : "" %>>Event</option>
+    <option value="Mastery" <%= filter.type === "Mastery" ? "selected" : "" %>>Mastery</option>
+    <option value="Personality" <%= filter.type === "Personality" ? "selected" : "" %>>Personality</option>
+    <option value="Physical Combat" <%= filter.type === "Physical Combat" ? "selected" : "" %>>Physical Combat</option>
+    <option value="Setup" <%= filter.type === "Setup" ? "selected" : "" %>>Setup</option>
+    <!-- Add other types as needed -->
+  </select>
+
+  <label for="style">Filter by Style:</label>
+  <select name="style" id="style">
+    <option value="" <%= filter.style === "" ? "selected" : "" %>>All</option>
+    <option value="Black" <%= filter.style === "Black" ? "selected" : "" %>>Black</option>
+    <option value="Blue" <%= filter.style === "Blue" ? "selected" : "" %>>Blue</option>
+    <option value="Namekian" <%= filter.style === "Namekian" ? "selected" : "" %>>Namekian</option>
+    <option value="Non-Styled" <%= filter.style === "Non-Styled" ? "selected" : "" %>>Non-Styled</option>
+    <option value="Orange" <%= filter.style === "Orange" ? "selected" : "" %>>Orange</option>
+    <option value="Red" <%= filter.style === "Red" ? "selected" : "" %>>Red</option>
+    <option value="Saiyan" <%= filter.style === "Saiyan" ? "selected" : "" %>>Saiyan</option>
+  </select>
+
+  <label for="name">Search by Name:</label>
+  <input type="text" name="name" id="name" value="<%= filter.name %>" placeholder="Enter card name">
+  <button type="submit">Filter</button>
+</form>
+
+
+<!-- Grid of Available Cards -->
+<div class="card-grid">
+  <% cards.forEach(card => { %>
+    <div class="card-item"
+         data-card-id="<%= card._id %>"
+         data-card-name="<%= card.name %>"
+         data-card-limit="<%= card.limit_per_deck %>"
+         data-card-type="<%= card.type %>"
+         data-card-style="<%= card.style %>"
+         data-card-pur="<%= card.pur %>"
+         data-card-title="<%= card.title %>"
+         data-card-level="<%= card.card_level %>"
+         data-card-alignment="<%= card.alignment %>">
+      <% if (card.img_url) { %>
+        <img src="<%= card.img_url %>" alt="<%= card.name %>" class="card-image">
+      <% } else { %>
+        <div class="no-image"><%= card.name %></div>
+      <% } %>
+      <button class="add-card-btn">Add</button>
+    </div>
+  <% }); %>
+</div>
+
+
+<!-- Scripts -->
+<script src="/js/deck-builder.js"></script>

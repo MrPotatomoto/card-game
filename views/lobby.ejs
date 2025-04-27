@@ -1,0 +1,118 @@
+<!-- views/lobby.ejs -->
+<h2>Lobby</h2>
+<p>Welcome, <%= user.username %>!</p>
+
+<!-- Filtering and Sorting Form -->
+<form id="filterForm" method="GET" action="/lobby">
+  <label for="status">Filter by Status:</label>
+  <select id="status" name="status">
+    <option value="" <%= filter === '' ? 'selected' : '' %>>All</option>
+    <option value="waiting" <%= filter === 'waiting' ? 'selected' : '' %>>Waiting</option>
+    <option value="in-progress" <%= filter === 'in-progress' ? 'selected' : '' %>>In Progress</option>
+    <option value="finished" <%= filter === 'finished' ? 'selected' : '' %>>Finished</option>
+  </select>
+
+  <label for="sortBy">Sort by:</label>
+  <select id="sortBy" name="sortBy">
+    <option value="dateDesc" <%= sortBy === 'dateDesc' ? 'selected' : '' %>>Newest First</option>
+    <option value="dateAsc" <%= sortBy === 'dateAsc' ? 'selected' : '' %>>Oldest First</option>
+    <option value="nameAsc" <%= sortBy === 'nameAsc' ? 'selected' : '' %>>Name A-Z</option>
+    <option value="nameDesc" <%= sortBy === 'nameDesc' ? 'selected' : '' %>>Name Z-A</option>
+  </select>
+
+  <button type="submit">Apply</button>
+</form>
+
+<ul id="gameList">
+  <% if (activeGames.length === 0) { %>
+    <p>No active games at the moment. Create one!</p>
+  <% } else { %>
+    <% activeGames.forEach(game => { %>
+      <li id="game-<%= game._id %>" class="show">
+        <a href="/game/<%= game._id %>"><%= game.name %></a>
+        <span id="status-<%= game._id %>"> (<%= game.status %>)</span>
+      </li>
+    <% }); %>
+  <% } %>
+</ul>
+<p><a href="/create-game">Create a Game</a></p>
+
+<!-- Socket.IO client script -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Save current filter from the server-rendered value.
+  const currentFilter = '<%= filter %>';
+  const socket = io();
+
+  socket.on('gameCreated', (game) => {
+    console.log('New game created:', game);
+    
+    // If a filter is active and the new game's status does not match, do not add it.
+    if (currentFilter && currentFilter !== game.status) {
+      return;
+    }
+
+    const gameListContainer = document.getElementById('gameList');
+    
+    // Remove placeholder text if present.
+    const placeholder = gameListContainer.querySelector('p');
+    if (placeholder) {
+      placeholder.remove();
+    }
+    
+    const listItem = document.createElement('li');
+    listItem.id = `game-${game._id}`;
+    listItem.classList.add('show');
+
+    const link = document.createElement('a');
+    link.href = `/game/${game._id}`;
+    link.innerText = game.name;
+    
+    // Add a span for the status.
+    const statusSpan = document.createElement('span');
+    statusSpan.id = `status-${game._id}`;
+    statusSpan.innerText = ` (${game.status})`;
+    statusSpan.style.marginLeft = '10px';
+
+    listItem.appendChild(link);
+    listItem.appendChild(statusSpan);
+    gameListContainer.appendChild(listItem);
+  });
+
+  // Existing socket listeners for game removal and game updates remain unchanged.
+  socket.on('gameRemoved', (gameId) => {
+    console.log('Game removed:', gameId);
+    const element = document.getElementById(`game-${gameId}`);
+    if (element) {
+      element.remove();
+    }
+  });
+
+  socket.on('gameUpdated', (game) => {
+    console.log('Game updated:', game);
+    const statusSpan = document.getElementById(`status-${game._id}`);
+    if (statusSpan) {
+      statusSpan.innerText = ` (${game.status})`;
+    }
+    // Optionally, you may want to show a toast notification here.
+    showToast(`Game "${game.name}" updated to ${game.status}`);
+  });
+
+  // Toast function definition remains as shown previously.
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    toast.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
+    toast.innerText = message;
+    toastContainer.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        toast.remove();
+      }, 500);
+    }, 3000);
+  }
+</script>

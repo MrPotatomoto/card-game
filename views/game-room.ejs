@@ -1,0 +1,80 @@
+<h2>Game Room</h2>
+<p>Room ID: <%= roomId %></p>
+<div id="gameState">
+  <p>Current Phase: <span id="phase"><%= phase %></span></p>
+  <p>Current Player: <span id="currentPlayer"><%= currentPlayer %></span></p>
+  <div id="log" style="border:1px solid #ccc; height:200px; overflow-y:scroll; padding:5px;">
+    <!-- Game log updates appear here -->
+  </div>
+</div>
+
+<!-- Action Buttons -->
+<div id="actions">
+  <button id="btnPlayCard">Play Selected Card</button>
+  <button id="btnEndPhase">End Phase</button>
+  <button id="btnResolveCombat">Resolve Combat</button>
+</div>
+
+<!-- For demonstration, a simple select for channeling a card from hand. In production, you'd list a player's actual hand. -->
+<div id="hand">
+  <h3>Your Hand</h3>
+  <select id="handSelect"></select>
+  <button id="btnDrawCard">Draw Card</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const roomId = "<%= roomId %>";
+  const playerName = "<%= playerName %>";
+  const socket = io();
+
+  // When connecting, join the game room.
+  socket.emit('joinGameRoom', roomId, playerName);
+
+  // Listen for game updates.
+  socket.on('gameUpdate', data => {
+    // Update UI elements.
+    document.getElementById('phase').innerText = data.phase;
+    document.getElementById('currentPlayer').innerText = data.currentPlayer;
+    // Add messages to log.
+    const logDiv = document.getElementById('log');
+    const msgDiv = document.createElement('div');
+    msgDiv.innerText = data.message;
+    logDiv.appendChild(msgDiv);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  });
+
+  // For demonstration, send a generic "end phase" action.
+  document.getElementById('btnEndPhase').addEventListener('click', () => {
+    socket.emit('playerAction', { roomId, playerName, type: 'endPhase' });
+  });
+
+  // Button to simulate playing a card.
+  document.getElementById('btnPlayCard').addEventListener('click', () => {
+    // For now, assume the selected card ID is sent (in production, retrieve from actual hand data)
+    const cardId = document.getElementById('handSelect').value;
+    socket.emit('playerAction', { roomId, playerName, type: 'playCard', cardId });
+  });
+
+  // Button to trigger combat resolution.
+  document.getElementById('btnResolveCombat').addEventListener('click', () => {
+    socket.emit('playerAction', { roomId, playerName, type: 'resolveCombat' });
+  });
+  
+  // Update hand display (in production, this would be dynamic)
+  socket.on('updateHand', hand => {
+    const handSelect = document.getElementById('handSelect');
+    handSelect.innerHTML = '';
+    hand.forEach(card => {
+      const option = document.createElement('option');
+      option.value = card._id;
+      option.text = card.name;
+      handSelect.appendChild(option);
+    });
+  });
+  
+  // Optionally, implement a button to request drawing a card
+  document.getElementById('btnDrawCard').addEventListener('click', () => {
+    socket.emit('playerAction', { roomId, playerName, type: 'drawCard' });
+  });
+</script>
