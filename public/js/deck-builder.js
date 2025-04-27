@@ -1,15 +1,14 @@
-// Define a key for localStorage.
+// Define localStorage key (if you're persisting deck state)
 const LOCAL_STORAGE_KEY = "deckCards"
-
 // Global deckCards array to hold the current deck.
 let deckCards = []
 
-// Function to save the current deck state to localStorage.
+// Save current deck state to localStorage.
 function saveDeckState() {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(deckCards))
 }
 
-// Function to load the deck state from localStorage.
+// Load deck state from localStorage.
 function loadDeckState() {
   const savedState = localStorage.getItem(LOCAL_STORAGE_KEY)
   if (savedState) {
@@ -22,8 +21,6 @@ function loadDeckState() {
     }
   }
 }
-
-// Load the stored deck state when the document content is loaded.
 window.addEventListener("DOMContentLoaded", loadDeckState)
 
 // Build mapping for each card's data details from the card-grid.
@@ -40,13 +37,13 @@ document.querySelectorAll(".card-item").forEach((item) => {
     level: item.getAttribute("data-card-level")
       ? parseInt(item.getAttribute("data-card-level"), 10)
       : null,
+    img: item.querySelector("img") ? item.querySelector("img").src : "", // Save image URL if available
   }
 })
 
 // When an add button is clicked, add the corresponding card to the deck.
 document.querySelectorAll(".add-card-btn").forEach((button) => {
   button.addEventListener("click", function (e) {
-    // Prevent event bubbling if needed.
     e.stopPropagation()
     const cardItem = button.parentElement
     const cardId = cardItem.getAttribute("data-card-id")
@@ -56,7 +53,7 @@ document.querySelectorAll(".add-card-btn").forEach((button) => {
     if (cardType === "Personality") {
       level = parseInt(cardItem.getAttribute("data-card-level"), 10)
     }
-    // Check if card already exists in deckCards (by cardId and level).
+    // Check if card already exists in deckCards.
     const existing = deckCards.find(
       (card) =>
         card.cardId === cardId && (card.level === level || level === null)
@@ -79,38 +76,47 @@ document.querySelectorAll(".add-card-btn").forEach((button) => {
   })
 })
 
-// Function to update the deck list display.
+// Function to update the sidebar deck list.
 function updateDeckList() {
-  const deckListDiv = document.getElementById("deckList")
-  deckListDiv.innerHTML = ""
-  deckCards.forEach((card, index) => {
-    const cardDiv = document.createElement("div")
-    cardDiv.style.marginBottom = "5px"
-    let displayText = card.name + " x " + card.quantity
-    if (card.type === "Personality" && card.level) {
-      displayText += " (Level " + card.level + ")"
-    }
-    cardDiv.textContent = displayText + " "
+  const sidebarDiv = document.getElementById("sidebarDeckList")
+  sidebarDiv.innerHTML = ""
 
-    const removeBtn = document.createElement("button")
-    removeBtn.type = "button"
-    removeBtn.innerText = "-"
-    removeBtn.addEventListener("click", () => {
-      if (card.quantity > 1) {
-        card.quantity--
-      } else {
-        deckCards.splice(index, 1)
-      }
-      updateDeckList()
-    })
-    cardDiv.appendChild(removeBtn)
-    deckListDiv.appendChild(cardDiv)
+  // Group deckCards by card type.
+  const groups = {}
+  deckCards.forEach((card) => {
+    if (!groups[card.type]) groups[card.type] = []
+    groups[card.type].push(card)
   })
 
-  // Update the hidden field with the JSON stringified deckCards.
+  // Create a header and list for each type.
+  for (const type in groups) {
+    let header = document.createElement("h4")
+    header.textContent = type
+    sidebarDiv.appendChild(header)
+
+    groups[type].forEach((card) => {
+      let row = document.createElement("div")
+      row.className = "sidebar-card-row"
+      row.textContent = `${card.name} x ${card.quantity}`
+      // On mouseover, update the preview pane to show the card's image.
+      row.addEventListener("mouseover", () => {
+        const preview = document.getElementById("previewImage")
+        const imgUrl = cardDetails[card.cardId].img
+        preview.src = imgUrl || ""
+      })
+      // Optionally, clear the preview on mouse out.
+      row.addEventListener("mouseout", () => {
+        const preview = document.getElementById("previewImage")
+        preview.src = "/img/card-back.jpg"
+      })
+      sidebarDiv.appendChild(row)
+    })
+  }
+
+  // Update the hidden field with the current deck state.
   document.getElementById("cardData").value = JSON.stringify(deckCards)
 
-  // Run deck validation and update feedback.
+  // Run deck validation.
   const result = validateDeck(deckCards)
   const validationDiv = document.getElementById("deckValidation")
   if (result.valid) {
@@ -121,11 +127,11 @@ function updateDeckList() {
       .join("")
   }
 
-  // After updating the deck list, save the current deck
+  // Save state for persistence.
   saveDeckState()
 }
 
-// Example validateDeck function (adjust as needed).
+// Existing validateDeck function remains unchanged.
 function validateDeck(deckCards) {
   let errors = []
   let personalityCards = []
